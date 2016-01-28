@@ -45,16 +45,12 @@
 
 (def trolo)
 
-(defn invoke-lambda [node-id simulation users lambda-function-name folder-name options]
-  (println "Invoking Lambda for" node-id)
+(defn invoke-lambda [simulation lambda-function-name options]
+  (println "Invoking Lambda for" (:node-id options))
   (parse-result (lambda/invoke (assoc creds :client-config {:socket-timeout (* 6 60 1000)})
                                :function-name lambda-function-name
                                :payload (generate-string {:simulation simulation
-                                                          :users users
-                                                          :options (-> options
-                                                                       (update :duration t/in-millis)
-                                                                       (assoc :folder-name folder-name
-                                                                               :node-id node-id))}))))
+                                                          :options (update options :duration t/in-millis)}))))
 
 (defn symbol-namespace [^clojure.lang.Symbol simulation]
   (str "/"
@@ -71,17 +67,19 @@
 (defn fully-qualified-name [^clojure.lang.Symbol simulation]
   (subs (str (resolve simulation)) 2))
 
-(defn run-simulation [node-count ^clojure.lang.Symbol simulation concurrency lambda-function-name options]
+(defn run-simulation [^clojure.lang.Symbol simulation {:keys [concurrency lambda-function-name node-count bucket-name] :as options
+                                                       :or {lambda-function-name "clojider-development-lambda"
+                                                            node-count 1}}]
   (let [splitted-users (split-to-number-of-buckets (range concurrency) node-count)
         folder-name (generate-folder-name)
-        result-channels (mapv #(thread (invoke-lambda %1
-                                                      (fully-qualified-name simulation)
-                                                      %2
+        result-channels (mapv #(thread (invoke-lambda (fully-qualified-name simulation)
                                                       lambda-function-name
-                                                      folder-name
-                                                      (assoc options :simulation-namespaces [(symbol-namespace simulation)])))
+                                                      (assoc options :folder-name folder-name
+                                                                     :node-id %1
+                                                                     :users %2
+                                                                     :simulation-namespaces [(symbol-namespace simulation)])))
                               (range)
                               splitted-users)
         all-results (mapcat :results (map <!! result-channels))]
     (println "Got results" all-results)
-    (create-chart all-results (:bucket-name options) folder-name)))
+    (create-chart all-results bucket-name folder-name)))

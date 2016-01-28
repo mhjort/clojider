@@ -12,9 +12,7 @@
     (doseq [simulation-ns (:simulation-namespaces (:options input))]
       (load simulation-ns))
     (let [result (run-simulation
-                   (:node-id input)
                    (eval (read-string (:simulation input)))
-                   (:users input)
                    (:options input))]
       (println "Returning result" result)
       (generate-stream result output)

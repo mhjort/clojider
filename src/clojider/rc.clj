@@ -7,15 +7,22 @@
            [clj-gatling.chart :as chart]
            [cheshire.core :refer [generate-string parse-stream]]
            [clj-gatling.simulation-util :refer [split-to-number-of-buckets]]
-           [clojure.core.async :refer [thread <!!]]
-           [amazonica.aws.s3 :as s3]
-           [amazonica.aws.lambda :as lambda]))
+           [clojure.core.async :refer [thread <!!]])
+  (:import [com.amazonaws.auth BasicAWSCredentials]
+           [com.amazonaws ClientConfiguration]
+           [com.amazonaws.regions Regions]
+           [com.amazonaws.services.s3 AmazonS3Client]
+           [com.amazonaws.services.lambda.model InvokeRequest]
+           [com.amazonaws.services.lambda AWSLambdaClient]))
 
 (def creds (edn/read-string (slurp "config.edn")))
 
+(def aws-credentials
+  (BasicAWSCredentials. (:access-key creds) (:secret-key creds)))
+
 (defn parse-result [result]
   (-> result
-      :payload
+      (.getPayload)
       (.array)
       (java.io.ByteArrayInputStream.)
       (io/reader)
@@ -28,8 +35,9 @@
     (.mkdirs (java.io.File. dir)))
 
 (defn download-file [results-dir bucket object-key]
-  (io/copy (:object-content (s3/get-object creds bucket object-key))
-           (io/file (str results-dir "/" (last (split object-key #"/"))))))
+  (let [client (AmazonS3Client. aws-credentials)]
+  (io/copy (.getObjectContent (.getObject client bucket object-key))
+           (io/file (str results-dir "/" (last (split object-key #"/")))))))
 
 (defn- generate-folder-name []
   (let [custom-formatter (f/formatter "yyyyMMddHHmmssSSS")]
@@ -45,10 +53,17 @@
 
 (defn invoke-lambda [simulation lambda-function-name options]
   (println "Invoking Lambda for" (:node-id options))
-  (parse-result (lambda/invoke (assoc creds :client-config {:socket-timeout (* 6 60 1000)})
-                               :function-name lambda-function-name
-                               :payload (generate-string {:simulation simulation
-                                                          :options (update options :duration t/in-millis)}))))
+  (let [credentials (BasicAWSCredentials. (:access-key creds) (:secret-key creds))
+        client-config (-> (ClientConfiguration.)
+                          (.withSocketTimeout (* 6 60 1000)))
+        client (-> (AWSLambdaClient. credentials client-config)
+                   (.withRegion (Regions/fromName (:endpoint creds))))
+        request (-> (InvokeRequest.)
+                    (.withFunctionName lambda-function-name)
+                    (.withPayload (generate-string {:simulation simulation
+                                                    :options (update options :duration t/in-millis)})))]
+
+    (parse-result (.invoke client request))))
 
 (defn symbol-namespace [^clojure.lang.Symbol simulation]
   (str "/"

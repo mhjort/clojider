@@ -7,7 +7,6 @@
                  [cheshire "5.5.0"]
                  [clj-gatling "0.7.6"]
                  [uswitch/lambada "0.1.0"]
-                 [amazonica "0.3.48" :exclusions [com.amazonaws/aws-java-sdk]]
                  [com.amazonaws/aws-java-sdk-lambda "1.10.49"]
                  [com.amazonaws/aws-java-sdk-core "1.10.49"]
                  [com.amazonaws/aws-java-sdk-s3 "1.10.49"]]

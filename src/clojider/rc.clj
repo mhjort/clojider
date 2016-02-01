@@ -81,4 +81,5 @@
                               splitted-users)
         all-results (mapcat :results (map <!! result-channels))]
     (println "Got results" all-results)
-    (create-chart all-results bucket-name folder-name)))
+    (create-chart all-results bucket-name folder-name)
+    (println "Open" (str "tmp/" folder-name "/index.html to see full report"))))

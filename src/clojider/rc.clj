@@ -70,7 +70,8 @@
                                                             node-count 1}}]
   (let [splitted-users (split-to-number-of-buckets (range concurrency) node-count)
         folder-name (generate-folder-name)
-        result-channels (mapv #(thread (invoke-lambda (fully-qualified-name simulation)
+        simu-name (fully-qualified-name simulation)
+        result-channels (mapv #(thread (invoke-lambda simu-name
                                                       lambda-function-name
                                                       (assoc options :folder-name folder-name
                                                                      :node-id %1

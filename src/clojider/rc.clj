@@ -66,7 +66,7 @@
   (subs (str (resolve simulation)) 2))
 
 (defn run-simulation [^clojure.lang.Symbol simulation {:keys [concurrency lambda-function-name node-count bucket-name] :as options
-                                                       :or {lambda-function-name "clojider-development-lambda"
+                                                       :or {lambda-function-name "clojider-load-testing-lambda"
                                                             node-count 1}}]
   (let [splitted-users (split-to-number-of-buckets (range concurrency) node-count)
         folder-name (generate-folder-name)

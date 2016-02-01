@@ -32,13 +32,14 @@
   (let [csv (csv/write-csv result-lines :delimiter "\t" :end-of-line "\n")]
     (store-to-s3 bucket (str folder "/simulation-" node-id "-" idx ".log") csv)))
 
-(defn run-simulation [simulation {:keys [node-id users] :as options}]
+(defn run-simulation [simulation {:keys [node-id users context] :as options}]
   (println "Running simulation in node" node-id)
   (reset! stored-objects [])
   (let [start-time (LocalDateTime.)
         step-timeout (or (:timeout-in-ms options) 5000)
         result (simulation/run-scenarios {:runner (choose-runner simulation (count users)
                                                                  (update options :duration t/millis))
+                                          :context context
                                           :timeout step-timeout}
                                          (weighted-scenarios users simulation))]
     (report/create-result-lines start-time

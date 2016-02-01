@@ -43,8 +43,6 @@
       (download-file input-dir bucket-name result))
     (chart/create-chart (str "tmp/" folder-name))))
 
-(def trolo)
-
 (defn invoke-lambda [simulation lambda-function-name options]
   (println "Invoking Lambda for" (:node-id options))
   (parse-result (lambda/invoke (assoc creds :client-config {:socket-timeout (* 6 60 1000)})

@@ -27,9 +27,6 @@
       (io/reader)
       (parse-stream true)))
 
-(defn generate-payload [o]
-  (java.nio.ByteBuffer/wrap (.getBytes (generate-string o) "UTF-8")))
-
 (defn create-dir [dir]
     (.mkdirs (java.io.File. dir)))
 

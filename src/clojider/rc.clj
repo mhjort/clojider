@@ -15,10 +15,9 @@
            [com.amazonaws.services.lambda.model InvokeRequest]
            [com.amazonaws.services.lambda AWSLambdaClient]))
 
-(def creds (edn/read-string (slurp "config.edn")))
-
 (def aws-credentials
-  (BasicAWSCredentials. (:access-key creds) (:secret-key creds)))
+  (BasicAWSCredentials. (System/getenv "AWS_ACCESS_KEY_ID")
+                        (System/getenv "AWS_SECRET_ACCESS_KEY")))
 
 (defn parse-result [result]
   (-> result
@@ -53,11 +52,10 @@
 
 (defn invoke-lambda [simulation lambda-function-name options]
   (println "Invoking Lambda for" (:node-id options))
-  (let [credentials (BasicAWSCredentials. (:access-key creds) (:secret-key creds))
-        client-config (-> (ClientConfiguration.)
+  (let [client-config (-> (ClientConfiguration.)
                           (.withSocketTimeout (* 6 60 1000)))
-        client (-> (AWSLambdaClient. credentials client-config)
-                   (.withRegion (Regions/fromName (:endpoint creds))))
+        client (-> (AWSLambdaClient. aws-credentials client-config)
+                   (.withRegion (Regions/fromName (:region options))))
         request (-> (InvokeRequest.)
                     (.withFunctionName lambda-function-name)
                     (.withPayload (generate-string {:simulation simulation

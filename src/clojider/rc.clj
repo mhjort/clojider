@@ -56,9 +56,18 @@
         request (-> (InvokeRequest.)
                     (.withFunctionName lambda-function-name)
                     (.withPayload (generate-string {:simulation simulation
-                                                    :options (update options :duration t/in-millis)})))]
+                                                    :options options})))]
 
     (parse-result (.invoke client request))))
+
+(def max-runtime-in-millis (* 4 60 1000))
+
+(defn split-to-durations [millis]
+  (loop [millis-left millis
+         buckets []]
+    (if (> millis-left max-runtime-in-millis)
+      (recur (- millis-left max-runtime-in-millis) (conj buckets max-runtime-in-millis))
+      (conj buckets millis-left))))
 
 (defn symbol-namespace [^clojure.lang.Symbol simulation]
   (str "/"
@@ -75,18 +84,26 @@
 (defn fully-qualified-name [^clojure.lang.Symbol simulation]
   (subs (str (resolve simulation)) 2))
 
-(defn run-simulation [^clojure.lang.Symbol simulation {:keys [concurrency lambda-function-name node-count bucket-name] :as options
+(defn invoke-lambda-sequentially-in-thread [simulation simu-name lambda-function-name folder-name options node-id users]
+  (let [durations (split-to-durations (t/in-millis (:duration options)))]
+    (thread
+      (apply merge-with concat
+             (mapv #(invoke-lambda simu-name
+                                  lambda-function-name
+                                  (assoc options :folder-name folder-name
+                                         :node-id node-id
+                                         :users users
+                                         :duration %
+                                         :simulation-namespaces [(symbol-namespace simulation)]))
+                  durations)))))
+
+(defn run-simulation [^clojure.lang.Symbol simulation {:keys [concurrency lambda-function-name node-count bucket-name duration] :as options
                                                        :or {lambda-function-name "clojider-load-testing-lambda"
                                                             node-count 1}}]
   (let [splitted-users (split-to-number-of-buckets (range concurrency) node-count)
         folder-name (generate-folder-name)
         simu-name (fully-qualified-name simulation)
-        result-channels (mapv #(thread (invoke-lambda simu-name
-                                                      lambda-function-name
-                                                      (assoc options :folder-name folder-name
-                                                                     :node-id %1
-                                                                     :users %2
-                                                                     :simulation-namespaces [(symbol-namespace simulation)])))
+        result-channels (mapv (partial invoke-lambda-sequentially-in-thread simulation simu-name lambda-function-name folder-name options)
                               (range)
                               splitted-users)
         all-results (mapcat :results (map <!! result-channels))]

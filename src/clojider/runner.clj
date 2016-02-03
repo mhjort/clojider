@@ -3,6 +3,7 @@
             [clojure-csv.core :as csv]
             [clojure.java.io :as io]
             [clj-time.core :as t]
+            [clj-time.format :as f]
             [clj-gatling.report :as report]
             [clj-gatling.simulation-util :refer [choose-runner
                                                  weighted-scenarios]]
@@ -28,14 +29,16 @@
     (swap! stored-objects conj s3-object-key)
     (.putObject client bucket s3-object-key temp-file)))
 
-(defn- gatling-csv-writer [bucket folder node-id idx result-lines]
+(defn- gatling-csv-writer [timestamp bucket folder node-id idx result-lines]
   (let [csv (csv/write-csv result-lines :delimiter "\t" :end-of-line "\n")]
-    (store-to-s3 bucket (str folder "/simulation-" node-id "-" idx ".log") csv)))
+    (store-to-s3 bucket (str folder "/simulation-" timestamp "-" node-id "-" idx ".log") csv)))
 
 (defn run-simulation [simulation {:keys [node-id users context] :as options}]
   (println "Running simulation in node" node-id)
   (reset! stored-objects [])
-  (let [start-time (LocalDateTime.)
+  (let [custom-formatter (f/formatter "yyyyMMddHHmmss")
+        start-time (LocalDateTime.)
+        timestamp (f/unparse custom-formatter (t/now))
         step-timeout (or (:timeout-in-ms options) 5000)
         result (simulation/run-scenarios {:runner (choose-runner simulation (count users)
                                                                  (update options :duration t/millis))
@@ -45,5 +48,9 @@
     (report/create-result-lines start-time
                                 buffer-size
                                 result
-                                (partial gatling-csv-writer (:bucket-name options) (:folder-name options) node-id))
+                                (partial gatling-csv-writer
+                                         timestamp
+                                         (:bucket-name options)
+                                         (:folder-name options)
+                                         node-id))
     {:results @stored-objects}))

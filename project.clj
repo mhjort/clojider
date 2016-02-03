@@ -1,4 +1,4 @@
-(defproject clojider "0.1.3"
+(defproject clojider "0.1.4"
   :description "FIXME: write description"
   :url "https://github.com/mhjort/clojider"
   :license {:name "Eclipse Public License"

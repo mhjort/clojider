@@ -1,5 +1,5 @@
 (ns clojider.rc
- (:require [clojure.edn :as edn]
+ (:require [clojider.aws :refer [aws-credentials]]
            [clojure.java.io :as io]
            [clojure.string :refer [split]]
            [clj-time.core :as t]
@@ -8,16 +8,11 @@
            [cheshire.core :refer [generate-string parse-stream]]
            [clj-gatling.simulation-util :refer [split-to-number-of-buckets]]
            [clojure.core.async :refer [thread <!!]])
-  (:import [com.amazonaws.auth BasicAWSCredentials]
-           [com.amazonaws ClientConfiguration]
+  (:import [com.amazonaws ClientConfiguration]
            [com.amazonaws.regions Regions]
            [com.amazonaws.services.s3 AmazonS3Client]
            [com.amazonaws.services.lambda.model InvokeRequest]
            [com.amazonaws.services.lambda AWSLambdaClient]))
-
-(def aws-credentials
-  (BasicAWSCredentials. (System/getenv "AWS_ACCESS_KEY_ID")
-                        (System/getenv "AWS_SECRET_ACCESS_KEY")))
 
 (defn parse-result [result]
   (-> result

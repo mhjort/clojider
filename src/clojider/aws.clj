@@ -71,14 +71,13 @@
                                                (.withS3Key "clojider-0.1.6-standalone.jar")))
                                 (.withRole role-arn)))))
 
-(defn init [bucket-name region]
-  (create-results-bucket bucket-name region)
-  (store-jar-to-bucket bucket-name)
-  (let [role-arn (create-role-and-policy "clojider-role" "clojider-policy" bucket-name)]
-    (create-lambda "test-lambda" region role-arn)))
+(defn init [region]
+  (let [bucket-name (str "clojider-results-" region)
+        role (str "clojider-role-" region)
+        policy (str "clojider-policy-" region)
+        role-arn (create-role-and-policy role policy bucket-name)]
+    (create-results-bucket bucket-name region)
+    (store-jar-to-bucket bucket-name)
+    (create-lambda "clojider-load-testing-lambda" region role-arn)))
 
-;(create-lambda "my-lambda" "eu-west-1")
-
-;(create-role-and-policy "markus-test6" "markus-policy6" "trolo")
-
-;(create-results-bucket "trolo" "eu-west-1")
+;(init "eu-west-1")

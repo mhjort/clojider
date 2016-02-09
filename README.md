@@ -27,5 +27,23 @@ Run clj-gatling load tests on your local machine or by utilizing AWS Lambda tech
   lein run install -r <lambda-region> -f target/<your-uberjar-path>
   ```
   
-  I
+### Writing tests
+
+See [clj-gatling](https://github.com/mhjort/clj-gatling) on how to define test scenarios.
+
+### Running tests
+
+### Locally
+
+  ```sh
+  lein run load-local -c <concurrency> -d <duration-in-seconds> -s <simulation-symbol>
+  ```
+
+### Using AWS Lambda
+
+  ```sh
+  lein run load-lambda -r <lambda-region> -c <concurrency> -d <duration-in-seconds> -s <simulation-symbol>
+  ```
+
+
   

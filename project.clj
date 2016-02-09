@@ -1,4 +1,4 @@
-(defproject clojider "0.1.6"
+(defproject clojider "0.2.0"
   :description "AWS Lambda powered, distributed load testing tool for Clojure"
   :url "https://github.com/mhjort/clojider"
   :license {:name "Eclipse Public License"

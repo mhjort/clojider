@@ -3,9 +3,15 @@
   (:import [com.amazonaws.services.identitymanagement AmazonIdentityManagementClient]
            [com.amazonaws.services.identitymanagement.model AttachRolePolicyRequest
                                                             CreatePolicyRequest
-                                                            CreateRoleRequest]
+                                                            CreateRoleRequest
+                                                            DeleteRoleRequest
+                                                            DeletePolicyRequest
+                                                            ListRolePoliciesRequest
+                                                            DetachRolePolicyRequest]
            [com.amazonaws.services.lambda AWSLambdaClient]
            [com.amazonaws.services.lambda.model CreateFunctionRequest
+                                                DeleteFunctionRequest
+                                                UpdateFunctionCodeRequest
                                                 FunctionCode]
            [com.amazonaws.auth BasicAWSCredentials]
            [com.amazonaws.services.s3 AmazonS3Client]
@@ -16,16 +22,32 @@
   (BasicAWSCredentials. (System/getenv "AWS_ACCESS_KEY_ID")
                         (System/getenv "AWS_SECRET_ACCESS_KEY")))
 
-(defn- create-results-bucket [bucket-name region]
-  (let [client (AmazonS3Client. aws-credentials)]
-    (.createBucket client bucket-name region)))
+(defonce s3-client
+  (delay (AmazonS3Client. aws-credentials)))
 
-(defn- store-jar-to-bucket [bucket-name]
-  (let [client (AmazonS3Client. aws-credentials)]
-  (.putObject client
+(defn- create-results-bucket [bucket-name region]
+  (println "Creating bucket" bucket-name "for the results.")
+  (if (= "us-east-1" region)
+    (.createBucket @s3-client bucket-name)
+    (.createBucket @s3-client bucket-name region)))
+
+(defn- store-jar-to-bucket [bucket-name jar-path]
+  (println "Uploading code to S3 from" jar-path)
+  (.putObject @s3-client
               bucket-name
-              "clojider-0.1.6-standalone.jar"
-              (File. "target/clojider-0.1.6-standalone.jar"))))
+              "clojider.jar"
+              (File. jar-path)))
+
+(defn- delete-results-bucket [bucket-name]
+  (.deleteBucket @s3-client bucket-name))
+
+(defn- delete-all-objects-from-bucket [bucket-name]
+  (println "Deleting all objects from bucket" bucket-name)
+  (let [object-keys (map #(.getKey %)
+                         (.getObjectSummaries (.listObjects @s3-client bucket-name)))]
+    (doseq [object-key object-keys]
+      (println "Deleting" object-key)
+      (.deleteObject @s3-client bucket-name object-key))))
 
 (def role
   {:Version "2012-10-17"
@@ -37,7 +59,7 @@
   {:Version "2012-10-17"
    :Statement [{:Effect "Allow"
                 :Action ["s3:PutObject"]
-                :Resource [(str "arn:aws:s3:::" bucket-name)]}
+                :Resource (str "arn:aws:s3:::" bucket-name "/*")}
                {:Effect "Allow"
                 :Action ["logs:CreateLogGroup"
                          "logs:CreateLogStream"
@@ -45,6 +67,7 @@
                 :Resource ["arn:aws:logs:*:*:*"]}]})
 
 (defn create-role-and-policy [role-name policy-name bucket-name]
+  (println "Creating role" role-name "with policy" policy-name)
   (let [client (AmazonIdentityManagementClient. aws-credentials)
         role (.createRole client (-> (CreateRoleRequest.)
                                      (.withRoleName role-name)
@@ -57,9 +80,40 @@
                                     (.withRoleName role-name))))
     (-> role .getRole .getArn)))
 
-(defn create-lambda [lambda-name region role-arn]
-  (let [client (-> (AWSLambdaClient. aws-credentials)
-                   (.withRegion (Regions/fromName region)))]
+(defn delete-role-and-policy [role-name policy-name]
+  (println "Deleting role" role-name "with policy" policy-name)
+  (let [client (AmazonIdentityManagementClient. aws-credentials)
+        policy-arn (.getArn (first (filter #(= policy-name (.getPolicyName %))
+                                           (.getPolicies (.listPolicies client)))))]
+    (.detachRolePolicy client (-> (DetachRolePolicyRequest.)
+                                  (.withPolicyArn policy-arn)
+                                  (.withRoleName role-name)))
+    (.deletePolicy client (-> (DeletePolicyRequest.)
+                              (.withPolicyArn policy-arn)))
+    (.deleteRole client (-> (DeleteRoleRequest.)
+                            (.withRoleName role-name)))))
+
+(defn- create-lambda-client [region]
+  (-> (AWSLambdaClient. aws-credentials)
+      (.withRegion (Regions/fromName region))))
+
+(defn delete-lambda-fn [lambda-name region]
+  (println "Deleting Lambda function" lambda-name "from region")
+  (let [client (create-lambda-client region)]
+    (.deleteFunction client (-> (DeleteFunctionRequest.)
+                                (.withFunctionName lambda-name)))))
+
+(defn- update-lambda-fn [lambda-name bucket-name region]
+  (println "Updating Lambda function" lambda-name "in region")
+  (let [client (create-lambda-client region)]
+    (.updateFunctionCode client (-> (UpdateFunctionCodeRequest.)
+                                    (.withFunctionName lambda-name)
+                                    (.withS3Bucket bucket-name)
+                                    (.withS3Key "clojider.jar")))))
+
+(defn- create-lambda-fn [lambda-name bucket-name region role-arn]
+  (println "Creating Lambda function" lambda-name "to region" region)
+  (let [client (create-lambda-client region)]
     (.createFunction client (-> (CreateFunctionRequest.)
                                 (.withFunctionName lambda-name)
                                 (.withMemorySize (int 1536))
@@ -67,17 +121,29 @@
                                 (.withRuntime "java8")
                                 (.withHandler "clojider.LambdaFn")
                                 (.withCode (-> (FunctionCode.)
-                                               (.withS3Bucket "trolo")
-                                               (.withS3Key "clojider-0.1.6-standalone.jar")))
+                                               (.withS3Bucket bucket-name)
+                                               (.withS3Key "clojider.jar")))
                                 (.withRole role-arn)))))
 
-(defn init [region]
+(defn install-lambda [{:keys [region file]}]
   (let [bucket-name (str "clojider-results-" region)
         role (str "clojider-role-" region)
         policy (str "clojider-policy-" region)
         role-arn (create-role-and-policy role policy bucket-name)]
     (create-results-bucket bucket-name region)
-    (store-jar-to-bucket bucket-name)
-    (create-lambda "clojider-load-testing-lambda" region role-arn)))
+    (store-jar-to-bucket bucket-name file)
+    (create-lambda-fn "clojider-load-testing-lambda" bucket-name region role-arn)))
 
-;(init "eu-west-1")
+(defn update-lambda [{:keys [region file]}]
+  (let [bucket-name (str "clojider-results-" region)]
+    (store-jar-to-bucket bucket-name file)
+    (update-lambda-fn "clojider-load-testing-lambda" bucket-name region)))
+
+(defn uninstall-lambda [{:keys [region]}]
+  (let [bucket-name (str "clojider-results-" region)
+        role (str "clojider-role-" region)
+        policy (str "clojider-policy-" region)]
+    (delete-role-and-policy role policy)
+    (delete-lambda-fn "clojider-load-testing-lambda" region)
+    (delete-all-objects-from-bucket bucket-name)
+    (delete-results-bucket bucket-name)))

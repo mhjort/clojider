@@ -1,5 +1,6 @@
 (ns clojider.rc
  (:require [clojider.aws :refer [aws-credentials]]
+           [clojider.utils :refer [fully-qualified-name symbol-namespace]]
            [clojure.java.io :as io]
            [clojure.string :refer [split]]
            [clj-time.core :as t]
@@ -63,21 +64,6 @@
     (if (> millis-left max-runtime-in-millis)
       (recur (- millis-left max-runtime-in-millis) (conj buckets max-runtime-in-millis))
       (conj buckets millis-left))))
-
-(defn symbol-namespace [^clojure.lang.Symbol simulation]
-  (str "/"
-       (clojure.string/join "/"
-                            (-> simulation
-                                (resolve)
-                                (str)
-                                (subs 2)
-                                (clojure.string/replace #"\." "/")
-                                (clojure.string/replace #"-" "_")
-                                (clojure.string/split #"/")
-                                (drop-last)))))
-
-(defn fully-qualified-name [^clojure.lang.Symbol simulation]
-  (subs (str (resolve simulation)) 2))
 
 (defn invoke-lambda-sequentially-in-thread [simulation simu-name lambda-function-name folder-name options node-id users]
   (let [durations (split-to-durations (t/in-millis (:duration options)))]

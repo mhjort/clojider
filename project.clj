@@ -13,6 +13,6 @@
                  [com.amazonaws/aws-java-sdk-core "1.10.50"]
                  [com.amazonaws/aws-java-sdk-s3 "1.10.50"]]
   :uberjar-exclusions [#"scala.*"]
-  :aot [clojider.lambda]
+  :aot [clojider.core clojider.lambda]
   :main clojider.core)
 

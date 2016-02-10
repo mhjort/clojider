@@ -14,13 +14,17 @@
    ["-c" "--concurrency CONCURRENCY" "Concurrency"
     :default 1
     :parse-fn #(Integer/parseInt %)]
+   ["-n" "--nodes NODES" "How many Lambda nodes to use"
+    :default 1
+    :parse-fn #(Integer/parseInt %)]
    ["-d" "--duration DURATION" "Duration in seconds"
     :default (t/seconds 1)
     :parse-fn #(t/seconds (Integer/parseInt %))]])
 
-(defn run-with-lambda [{:keys [simulation region concurrency duration]}]
+(defn run-with-lambda [{:keys [simulation region concurrency nodes duration]}]
   (rc/run-simulation (symbol simulation) {:region region
                                           :concurrency concurrency
+                                          :node-count nodes
                                           :bucket-name (str "clojider-results-" region)
                                           :duration duration}))
 

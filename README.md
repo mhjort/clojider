@@ -12,6 +12,12 @@ Run clj-gatling load tests on your local machine or by utilizing AWS Lambda tech
   [clojider "0.2.0"]
   ```
   
+  Add this setting to your `project.clj`
+  
+  ```clojure
+  :main clojider.core
+  ```
+  
 ### AWS Lambda setup
   
   Add this setting to your `project.clj`
@@ -44,6 +50,3 @@ See [clj-gatling](https://github.com/mhjort/clj-gatling) on how to define test s
   ```sh
   lein run load-lambda -r <lambda-region> -c <concurrency> -d <duration-in-seconds> -s <simulation-symbol>
   ```
-
-
-  

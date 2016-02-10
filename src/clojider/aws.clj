@@ -13,14 +13,13 @@
                                                 DeleteFunctionRequest
                                                 UpdateFunctionCodeRequest
                                                 FunctionCode]
-           [com.amazonaws.auth BasicAWSCredentials]
+           [com.amazonaws.auth DefaultAWSCredentialsProviderChain]
            [com.amazonaws.services.s3 AmazonS3Client]
            [com.amazonaws.regions Regions]
            [java.io File]))
 
 (def aws-credentials
-  (BasicAWSCredentials. (System/getenv "AWS_ACCESS_KEY_ID")
-                        (System/getenv "AWS_SECRET_ACCESS_KEY")))
+  (.getCredentials (DefaultAWSCredentialsProviderChain.)))
 
 (defonce s3-client
   (delay (AmazonS3Client. aws-credentials)))

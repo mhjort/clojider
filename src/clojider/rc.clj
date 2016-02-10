@@ -44,7 +44,7 @@
     (chart/create-chart (str "tmp/" folder-name))))
 
 (defn invoke-lambda [simulation lambda-function-name options]
-  (println "Invoking Lambda for" (:node-id options))
+  (println "Invoking Lambda for node:" (:node-id options))
   (let [client-config (-> (ClientConfiguration.)
                           (.withSocketTimeout (* 6 60 1000)))
         client (-> (AWSLambdaClient. aws-credentials client-config)

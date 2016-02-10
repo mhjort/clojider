@@ -20,6 +20,9 @@ Run clj-gatling load tests on your local machine or by utilizing AWS Lambda tech
   
 ### AWS Lambda setup
   
+  Note! Clojider has to setup one S3 bucket, IAM role & policy and Lambda function using your AWS credentials.
+  The credentials are read from standard environment variables or configuration file. See details from  [here](http://docs.aws.amazon.com/AWSSdkDocsJava/latest/DeveloperGuide/set-up-creds.html). 
+
   Add this setting to your `project.clj`
   
   ```clojure

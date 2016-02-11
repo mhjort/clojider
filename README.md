@@ -40,6 +40,8 @@ Run clj-gatling load tests on your local machine or by utilizing AWS Lambda tech
 
 ### Writing tests
 
+You can find few simple examples [here](https://github.com/mhjort/clojider/blob/master/src/clojider/examples.clj).
+
 See [clj-gatling](https://github.com/mhjort/clj-gatling) on how to define test scenarios.
 
 ### Running tests

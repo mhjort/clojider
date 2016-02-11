@@ -57,3 +57,21 @@ See [clj-gatling](https://github.com/mhjort/clj-gatling) on how to define test s
   ```sh
   lein run load-lambda -r <lambda-region> -c <concurrency> -d <duration-in-seconds> -s <simulation-symbol>
   ```
+
+  And when you have updated your simulation (the scenario code), you have to update latest code to Lambda via
+
+  ```sh
+  lein uberjar
+  lein run update -r <lambda-region> -f target/<your-uberjar-path>
+  ```
+
+## Uninstall
+
+This will uninstall all created AWS resources (S3 bucket, role, policy and Lambda function).
+The cost of keeping these available in your account for the next load testing run is almost zero.
+Lambda pricing is totally based on the usage and S3 bucket contains only smallish old result files.
+However, I still wanted to have an option to destroy everything when you don't need the tool anymore.
+
+  ```sh
+  lein run uninstall -r <lambda-region>
+  ```

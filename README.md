@@ -31,7 +31,8 @@ Run clj-gatling load tests on your local machine or by utilizing AWS Lambda tech
   :uberjar-exclusions [#"scala.*"]
   ```
 
-  Deploy your project to AWS Lambda
+  Deploy your project to AWS Lambda.
+  Note! Lambda is available in these regions: eu-west-1, us-east-1, us-west-2 and ap-northeast-1.
 
   ```sh
   lein uberjar
@@ -40,7 +41,17 @@ Run clj-gatling load tests on your local machine or by utilizing AWS Lambda tech
 
 ### Writing tests
 
-You can find few simple examples [here](https://github.com/mhjort/clojider/blob/master/src/clojider/examples.clj).
+You can find few simple examples [here](https://github.com/mhjort/clojider/blob/master/src/clojider/examples.clj)
+which you run locally in a following way.
+
+```sh
+  lein run load-local -c 5 -d 10 -s clojider.examples/ping-simulation
+```
+or
+
+```sh
+  lein run load-local -c 5 -d 10 -s clojider.examples/metrics-simulation
+```
 
 See [clj-gatling](https://github.com/mhjort/clj-gatling) on how to define test scenarios.
 

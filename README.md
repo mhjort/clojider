@@ -4,6 +4,12 @@
 
 Run clj-gatling load tests on your local machine or by utilizing AWS Lambda technology.
 
+## Features
+
+* Test your system using realistic scenarios. Not just one url.
+* Write test scenarios in Clojure. No special DSL.
+* Run your tests either from local machine or using multiple nodes using AWS Lambda technology.
+
 ## Installation
 
 ### Basic setup

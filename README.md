@@ -31,7 +31,7 @@ Run clj-gatling load tests on your local machine or by utilizing AWS Lambda tech
   Note! Clojider has to setup one S3 bucket, IAM role & policy and Lambda function using your AWS credentials.
   The credentials are read from standard environment variables or configuration file. See details from  [here](http://docs.aws.amazon.com/AWSSdkDocsJava/latest/DeveloperGuide/set-up-creds.html).
 
-  Add this setting to your `project.clj`
+  Add this setting to your `project.clj`. This is required because report generation uses Gatling report generation [module](https://github.com/gatling/gatling-highcharts) which is Scala code. Report generation happens in local machine and this setting prevents Scala code to be included in to Jar file that is deployed to AWS Lambda environment. 
 
   ```clojure
   :uberjar-exclusions [#"scala.*"]

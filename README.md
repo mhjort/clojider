@@ -92,3 +92,7 @@ However, I still wanted to have an option to destroy everything when you don't n
   ```sh
   lein run uninstall -r <lambda-region>
   ```
+
+## Contribute
+
+Use [GitHub issues](https://github.com/mhjort/clojider/issues) and [Pull Requests](https://github.com/mhjort/clojider/pulls).

@@ -28,10 +28,11 @@ Run clj-gatling load tests on your local machine or by utilizing AWS Lambda tech
 
 ### AWS Lambda setup
 
-  Note! Clojider has to setup one S3 bucket, IAM role & policy and Lambda function using your AWS credentials.
+  Note! Clojider has to setup one S3 bucket, IAM role & policy and Lambda function using your AWS credentials. S3 bucket name you have to configure, other resources will be auto-named.
   The credentials are read from standard environment variables or configuration file. See details from  [here](http://docs.aws.amazon.com/AWSSdkDocsJava/latest/DeveloperGuide/set-up-creds.html).
 
-  Add this setting to your `project.clj`. This is required because report generation uses Gatling report generation [module](https://github.com/gatling/gatling-highcharts) which is Scala code. Report generation happens in local machine and this setting prevents Scala code to be included in to Jar file that is deployed to AWS Lambda environment. 
+  Add this setting to your `project.clj`. This is required because report generation uses Gatling report generation [module](https://github.com/gatling/gatling-highcharts) which is Scala code.
+  Report generation happens in local machine and this setting prevents Scala code to be included in to Jar file that is deployed to AWS Lambda environment.
 
   ```clojure
   :uberjar-exclusions [#"scala.*"]
@@ -42,7 +43,7 @@ Run clj-gatling load tests on your local machine or by utilizing AWS Lambda tech
 
   ```sh
   lein uberjar
-  lein run install -r <lambda-region> -f target/<your-uberjar-path>
+  lein run install -r <lambda-region> -b <s3-bucket-name> -f target/<your-uberjar-path>
   ```
 
 ### Writing tests
@@ -72,14 +73,14 @@ See [clj-gatling](https://github.com/mhjort/clj-gatling) on how to define test s
 ### Using AWS Lambda
 
   ```sh
-  lein run load-lambda -r <lambda-region> -c <concurrency> -d <duration-in-seconds> -s <simulation-symbol>
+  lein run load-lambda -r <lambda-region> -b <s3-bucket-name> -c <concurrency> -d <duration-in-seconds> -s <simulation-symbol>
   ```
 
   And when you have updated your simulation (the scenario code), you have to update latest code to Lambda via
 
   ```sh
   lein uberjar
-  lein run update -r <lambda-region> -f target/<your-uberjar-path>
+  lein run update -r <lambda-region> -b <s3-bucket-name> -f target/<your-uberjar-path>
   ```
 
 ## Uninstall
@@ -90,7 +91,7 @@ Lambda pricing is totally based on the usage and S3 bucket contains only smallis
 However, I still wanted to have an option to destroy everything when you don't need the tool anymore.
 
   ```sh
-  lein run uninstall -r <lambda-region>
+  lein run uninstall -r <lambda-region> -b <s3-bucket-name>
   ```
 
 ## Contribute

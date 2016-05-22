@@ -17,7 +17,7 @@ Run clj-gatling load tests on your local machine or by utilizing AWS Lambda tech
   Create new Clojure project & add the following to your `project.clj` `:dependencies`:
 
   ```clojure
-  [clojider "0.2.2"]
+  [clojider "0.3.0"]
   ```
 
   Add this setting to your `project.clj`

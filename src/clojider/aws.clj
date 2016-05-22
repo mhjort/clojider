@@ -126,25 +126,22 @@
                                                (.withS3Key "clojider.jar")))
                                 (.withRole role-arn)))))
 
-(defn install-lambda [{:keys [region file]}]
-  (let [bucket-name (str "clojider-results-" region)
-        role (str "clojider-role-" region)
+(defn install-lambda [{:keys [region bucket file]}]
+  (let [role (str "clojider-role-" region)
         policy (str "clojider-policy-" region)
-        role-arn (create-role-and-policy role policy bucket-name)]
-    (create-results-bucket bucket-name region)
-    (store-jar-to-bucket bucket-name file)
-    (create-lambda-fn "clojider-load-testing-lambda" bucket-name region role-arn)))
+        role-arn (create-role-and-policy role policy bucket)]
+    (create-results-bucket bucket region)
+    (store-jar-to-bucket bucket file)
+    (create-lambda-fn "clojider-load-testing-lambda" bucket region role-arn)))
 
-(defn update-lambda [{:keys [region file]}]
-  (let [bucket-name (str "clojider-results-" region)]
-    (store-jar-to-bucket bucket-name file)
-    (update-lambda-fn "clojider-load-testing-lambda" bucket-name region)))
+(defn update-lambda [{:keys [region bucket file]}]
+  (store-jar-to-bucket bucket file)
+  (update-lambda-fn "clojider-load-testing-lambda" bucket region))
 
-(defn uninstall-lambda [{:keys [region]}]
-  (let [bucket-name (str "clojider-results-" region)
-        role (str "clojider-role-" region)
+(defn uninstall-lambda [{:keys [region bucket]}]
+  (let [role (str "clojider-role-" region)
         policy (str "clojider-policy-" region)]
     (delete-role-and-policy role policy)
     (delete-lambda-fn "clojider-load-testing-lambda" region)
-    (delete-all-objects-from-bucket bucket-name)
-    (delete-results-bucket bucket-name)))
+    (delete-all-objects-from-bucket bucket)
+    (delete-results-bucket bucket)))

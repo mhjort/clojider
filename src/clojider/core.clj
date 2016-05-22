@@ -9,6 +9,7 @@
 
 (def cli-options
   [["-r" "--region REGION" "Which region to use"]
+   ["-b" "--bucket BUCKET" "Amazon S3 bucket name for Clojider result files"]
    ["-f" "--file FILE" "Path of uberjar"]
    ["-s" "--simulation SIMULATION" "Fully qualified name of simulation"]
    ["-c" "--concurrency CONCURRENCY" "Concurrency"
@@ -21,11 +22,11 @@
     :default (t/seconds 1)
     :parse-fn #(t/seconds (Integer/parseInt %))]])
 
-(defn run-with-lambda [{:keys [simulation region concurrency nodes duration]}]
+(defn run-with-lambda [{:keys [simulation region bucket concurrency nodes duration]}]
   (rc/run-simulation (symbol simulation) {:region region
                                           :concurrency concurrency
                                           :node-count nodes
-                                          :bucket-name (str "clojider-results-" region)
+                                          :bucket-name bucket
                                           :duration duration}))
 
 

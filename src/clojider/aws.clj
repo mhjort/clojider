@@ -25,10 +25,12 @@
   (delay (AmazonS3Client. aws-credentials)))
 
 (defn- create-results-bucket [bucket-name region]
-  (println "Creating bucket" bucket-name "for the results.")
-  (if (= "us-east-1" region)
-    (.createBucket @s3-client bucket-name)
-    (.createBucket @s3-client bucket-name region)))
+  (if (.doesBucketExist @s3-client bucket-name)
+    (println bucket-name "already exists. Skipping creation.")
+    (do (println "Creating bucket" bucket-name "for the results.")
+        (if (= "us-east-1" region)
+          (.createBucket @s3-client bucket-name)
+          (.createBucket @s3-client bucket-name region)))))
 
 (defn- store-jar-to-bucket [bucket-name jar-path]
   (println "Uploading code to S3 from" jar-path)

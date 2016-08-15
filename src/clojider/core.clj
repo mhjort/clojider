@@ -29,13 +29,12 @@
                                           :bucket-name bucket
                                           :duration duration}))
 
-
 (defn run-using-local-machine [{:keys [simulation concurrency duration]}]
   (load (symbol-namespace simulation))
-  (gatling/run-simulation (eval (read-string simulation))
-                          concurrency
-                          {:root "tmp"
-                           :duration duration}))
+  (gatling/run (eval (read-string simulation))
+               {:concurrency concurrency
+                :root "tmp"
+                :duration duration}))
 
 (def cmds
   {"install" aws/install-lambda

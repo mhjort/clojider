@@ -3,9 +3,9 @@
   :url "https://github.com/mhjort/clojider"
   :license {:name "Eclipse Public License"
             :url "http://www.eclipse.org/legal/epl-v10.html"}
-  :dependencies [[org.clojure/clojure "1.7.0"]
+  :dependencies [[org.clojure/clojure "1.8.0"]
                  [cheshire "5.5.0"]
-                 [clj-gatling "0.7.9"]
+                 [clj-gatling "0.8.2"]
                  [uswitch/lambada "0.1.0"]
                  [org.clojure/tools.cli "0.3.3"]
                  [com.amazonaws/aws-java-sdk-iam "1.10.50"]

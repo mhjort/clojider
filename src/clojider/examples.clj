@@ -1,23 +1,31 @@
 (ns clojider.examples
-  (:require [org.httpkit.client :as http]))
+  (:require [clojure.core.async :refer [chan go >!]]
+            [org.httpkit.client :as http]))
 
 (def base-url "http://clj-gatling-demo-server.herokuapp.com")
 
-(defn- http-get [url callback _]
-  (let [check-status (fn [{:keys [status]}] (callback (= 200 status)))]
-    (http/get (str base-url url) {} check-status)))
+(defn- http-get [url _]
+  (let [response (chan)
+        check-status (fn [{:keys [status]}]
+                       (go (>! response (= 200 status))))]
+    (http/get (str base-url url) {} check-status)
+    response))
 
-(defn- http-get-with-ids [url ids callback {:keys [user-id]}]
-  (let [check-status (fn [{:keys [status]}] (callback (= 200 status)))
+(defn- http-get-with-ids [url ids {:keys [user-id]}]
+  (let [response (chan)
+        check-status (fn [{:keys [status]}]
+                       (go (>! response (= 200 status))))
         id (nth ids user-id)]
-    (http/get (str base-url url id) {} check-status)))
+    (http/get (str base-url url id) {} check-status)
+    response))
 
 (def ping
   (partial http-get "/ping"))
 
 (def ping-simulation
-  [{:name "Ping scenario"
-    :requests [{:name "Ping Endpoint" :fn ping}]}])
+  {:name "Ping simulation"
+   :scenarios [{:name "Ping scenario"
+                :steps [{:name "Ping Endpoint" :request ping}]}]})
 
 (def article-read
   (partial http-get-with-ids "/metrics/article/read/" (cycle (range 100 200))))
@@ -26,11 +34,16 @@
   (partial http-get-with-ids "/metrics/program/start/" (cycle (range 200 400))))
 
 (def metrics-simulation
-  [{:name "Article read scenario"
-    :weight 2
-    :requests [{:name "Article read request"
-                :fn article-read}]}
-   {:name "Program start scenario"
-    :weight 1
-    :requests [{:name "Program start request"
-                :fn program-start}]}])
+  {:name "Metrics simulation"
+   :scenarios [{:name "Article read scenario"
+                :weight 2
+                :steps [{:name "Article read request"
+                         :request article-read}]}
+               {:name "Program start scenario"
+                :weight 1
+                :steps [{:name "Program start request"
+                         :request program-start}]}]})
+
+(def simulations
+  {:ping ping-simulation
+   :metrics metrics-simulation})

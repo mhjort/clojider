@@ -75,6 +75,7 @@
                                          :node-id node-id
                                          :users users
                                          :duration %
+                                         :timeout-in-ms (:timeout-in-ms options)
                                          :simulation-namespaces [(symbol-namespace simulation)]))
                   durations)))))
 

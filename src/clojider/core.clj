@@ -18,22 +18,27 @@
    ["-n" "--nodes NODES" "How many Lambda nodes to use"
     :default 1
     :parse-fn #(Integer/parseInt %)]
+   ["-t" "--timeout TIMEOUT" "Rquest timeout in milliseconds"
+    :default 5000
+    :parse-fn #(Integer/parseInt %)]
    ["-d" "--duration DURATION" "Duration in seconds"
     :default (t/seconds 1)
     :parse-fn #(t/seconds (Integer/parseInt %))]])
 
-(defn run-with-lambda [{:keys [simulation region bucket concurrency nodes duration]}]
+(defn run-with-lambda [{:keys [simulation region bucket concurrency nodes duration timeout]}]
   (rc/run-simulation (symbol simulation) {:region region
                                           :concurrency concurrency
                                           :node-count nodes
                                           :bucket-name bucket
+                                          :timeout-in-ms timeout
                                           :duration duration}))
 
-(defn run-using-local-machine [{:keys [simulation concurrency duration]}]
+(defn run-using-local-machine [{:keys [simulation concurrency duration timeout]}]
   (load (symbol-namespace simulation))
   (gatling/run (eval (read-string simulation))
                {:concurrency concurrency
                 :root "tmp"
+                :timeout-in-ms timeout
                 :duration duration}))
 
 (def cmds

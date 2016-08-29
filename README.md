@@ -48,7 +48,7 @@ Note! Clojider 0.4.0 supports latest [clj-gatling](https://github.com/mhjort/clj
   lein run install -r <lambda-region> -b <s3-bucket-name> -f target/<your-uberjar-path>
   ```
 
-### Writing tests
+## Writing tests
 
 You can find few simple examples [here](https://github.com/mhjort/clojider/blob/master/src/clojider/examples.clj)
 which you run locally in a following way.
@@ -64,7 +64,7 @@ or
 
 See [clj-gatling](https://github.com/mhjort/clj-gatling) on how to define test scenarios.
 
-### Running tests
+## Running tests
 
 ### Locally
 
@@ -85,6 +85,10 @@ See [clj-gatling](https://github.com/mhjort/clj-gatling) on how to define test s
   lein run update -r <lambda-region> -b <s3-bucket-name> -f target/<your-uberjar-path>
   ```
 
+### Optional parameters
+
+  * `-t` or `--timeout`` specifies request timeout in milliseconds. By default it is 5000 ms.
+
 ## Uninstall
 
 This will uninstall all created AWS resources (S3 bucket, role, policy and Lambda function).
@@ -95,6 +99,8 @@ However, I still wanted to have an option to destroy everything when you don't n
   ```sh
   lein run uninstall -r <lambda-region> -b <s3-bucket-name>
   ```
+
+
 
 ## Contribute
 

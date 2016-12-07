@@ -1,13 +1,12 @@
 (ns clojider.rc
  (:require [clojider.aws :refer [aws-credentials]]
-           [clojider.utils :refer [fully-qualified-name symbol-namespace]]
+           [clojider.utils :refer [fully-qualified-name symbol-namespace split-to-number-of-buckets]]
            [clojure.java.io :as io]
            [clojure.string :refer [split]]
            [clj-time.core :as t]
            [clj-time.format :as f]
            [clj-gatling.chart :as chart]
            [cheshire.core :refer [generate-string parse-stream]]
-           [clj-gatling.simulation-util :refer [split-to-number-of-buckets]]
            [clojure.core.async :refer [thread <!!]])
   (:import [com.amazonaws ClientConfiguration]
            [com.amazonaws.regions Regions]

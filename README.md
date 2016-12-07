@@ -19,7 +19,7 @@ Note! Clojider 0.4.x supports latest [clj-gatling](https://github.com/mhjort/clj
   Create new Clojure project & add the following to your `project.clj` `:dependencies`:
 
   ```clojure
-  [clojider "0.4.1"]
+  [clojider "0.4.2"]
   ```
 
   Add this setting to your `project.clj`

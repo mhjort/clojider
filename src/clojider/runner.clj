@@ -5,6 +5,7 @@
             [clj-time.core :as t]
             [clj-time.format :as f]
             [clj-gatling.report :as report]
+            [clojider-gatling-highcharts-reporter.reporter :refer [gatling-csv-lines]]
             [clojure.core.async :refer [<!!]])
   (:import [org.joda.time LocalDateTime]
            [java.io File]
@@ -29,7 +30,7 @@
 
 (defn- gatling-csv-writer [timestamp start-time bucket folder node-id simulation idx results]
   (println "Got results" results)
-  (let [result-lines (report/gatling-csv-lines start-time simulation idx results)
+  (let [result-lines (gatling-csv-lines start-time simulation idx results)
         csv (write-csv result-lines :delimiter "\t" :end-of-line "\n")]
     (store-to-s3 bucket (str folder "/simulation-" timestamp "-" node-id "-" idx ".log") csv)))
 

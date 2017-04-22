@@ -5,7 +5,7 @@
            [clojure.string :refer [split]]
            [clj-time.core :as t]
            [clj-time.format :as f]
-           [clj-gatling.chart :as chart]
+           [clojider-gatling-highcharts-reporter.generator :as highcharts]
            [cheshire.core :refer [generate-string parse-stream]]
            [clojure.core.async :refer [thread <!!]])
   (:import [com.amazonaws ClientConfiguration]
@@ -40,7 +40,7 @@
     (println "Downloading" results "from" bucket-name)
     (doseq [result results]
       (download-file input-dir bucket-name result))
-    (chart/create-chart (str "tmp/" folder-name))))
+    (highcharts/create-chart (str "tmp/" folder-name))))
 
 (defn invoke-lambda [simulation lambda-function-name options]
   (println "Invoking Lambda for node:" (:node-id options))

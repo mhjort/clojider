@@ -1,5 +1,7 @@
 # clojider
 
+[![Build Status](https://travis-ci.org/mhjort/clojider.svg?branch=master)](https://travis-ci.org/mhjort/clojider)
+
 ![alt text](https://upload.wikimedia.org/wikipedia/commons/thumb/5/5c/Atlas_November_2005.jpg/220px-Atlas_November_2005.jpg "Large Hadron Collider")
 
 Run clj-gatling load tests on your local machine or by utilizing AWS Lambda technology.

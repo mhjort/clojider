@@ -34,6 +34,7 @@
                                           :duration duration}))
 
 (defn run-using-local-machine [{:keys [simulation concurrency duration timeout]}]
+  (println "Loading simulation" simulation)
   (load (symbol-namespace simulation))
   (gatling/run (eval (read-string simulation))
                {:concurrency concurrency

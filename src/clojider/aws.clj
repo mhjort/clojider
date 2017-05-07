@@ -19,10 +19,10 @@
            [java.io File]))
 
 (def aws-credentials
-  (.getCredentials (DefaultAWSCredentialsProviderChain.)))
+  (delay (.getCredentials (DefaultAWSCredentialsProviderChain.))))
 
 (defonce s3-client
-  (delay (AmazonS3Client. aws-credentials)))
+  (delay (AmazonS3Client. @aws-credentials)))
 
 (defn- create-results-bucket [bucket-name region]
   (if (.doesBucketExist @s3-client bucket-name)
@@ -69,7 +69,7 @@
 
 (defn create-role-and-policy [role-name policy-name bucket-name]
   (println "Creating role" role-name "with policy" policy-name)
-  (let [client (AmazonIdentityManagementClient. aws-credentials)
+  (let [client (AmazonIdentityManagementClient. @aws-credentials)
         role (.createRole client (-> (CreateRoleRequest.)
                                      (.withRoleName role-name)
                                      (.withAssumeRolePolicyDocument (generate-string role))))]
@@ -83,7 +83,7 @@
 
 (defn delete-role-and-policy [role-name policy-name]
   (println "Deleting role" role-name "with policy" policy-name)
-  (let [client (AmazonIdentityManagementClient. aws-credentials)
+  (let [client (AmazonIdentityManagementClient. @aws-credentials)
         policy-arn (.getArn (first (filter #(= policy-name (.getPolicyName %))
                                            (.getPolicies (.listPolicies client)))))]
     (.detachRolePolicy client (-> (DetachRolePolicyRequest.)
@@ -95,7 +95,7 @@
                             (.withRoleName role-name)))))
 
 (defn- create-lambda-client [region]
-  (-> (AWSLambdaClient. aws-credentials)
+  (-> (AWSLambdaClient. @aws-credentials)
       (.withRegion (Regions/fromName region))))
 
 (defn delete-lambda-fn [lambda-name region]

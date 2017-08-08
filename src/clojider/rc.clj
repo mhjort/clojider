@@ -46,7 +46,7 @@
   (println "Invoking Lambda for node:" (:node-id options))
   (let [client-config (-> (ClientConfiguration.)
                           (.withSocketTimeout (* 6 60 1000)))
-        client (-> (AWSLambdaClient. aws-credentials client-config)
+        client (-> (AWSLambdaClient. @aws-credentials client-config)
                    (.withRegion (Regions/fromName (:region options))))
         request (-> (InvokeRequest.)
                     (.withFunctionName lambda-function-name)

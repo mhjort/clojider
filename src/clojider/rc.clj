@@ -26,7 +26,7 @@
     (.mkdirs (java.io.File. dir)))
 
 (defn download-file [results-dir bucket object-key]
-  (let [client (AmazonS3Client. aws-credentials)]
+  (let [client (AmazonS3Client. @aws-credentials)]
   (io/copy (.getObjectContent (.getObject client bucket object-key))
            (io/file (str results-dir "/" (last (split object-key #"/")))))))
 

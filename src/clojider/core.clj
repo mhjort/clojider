@@ -1,7 +1,6 @@
 (ns clojider.core
   (:require [clojure.tools.cli :refer [parse-opts]]
             [clojider.rc :as rc]
-            [clojider.utils :refer [symbol-namespace]]
             [clj-gatling.core :as gatling]
             [clj-time.core :as t]
             [clojider.aws :as aws])
@@ -26,17 +25,16 @@
     :parse-fn #(t/seconds (Integer/parseInt %))]])
 
 (defn run-with-lambda [{:keys [simulation region bucket concurrency nodes duration timeout]}]
-  (rc/run-simulation (symbol simulation) {:region region
-                                          :concurrency concurrency
-                                          :node-count nodes
-                                          :bucket-name bucket
-                                          :timeout-in-ms timeout
-                                          :duration duration}))
+  (rc/run-simulation (read-string simulation) {:region region
+                                               :concurrency concurrency
+                                               :node-count nodes
+                                               :bucket-name bucket
+                                               :timeout-in-ms timeout
+                                               :duration duration}))
 
 (defn run-using-local-machine [{:keys [simulation concurrency duration timeout]}]
   (println "Loading simulation" simulation)
-  (load (symbol-namespace simulation))
-  (gatling/run (eval (read-string simulation))
+  (gatling/run simulation
                {:concurrency concurrency
                 :root "tmp"
                 :timeout-in-ms timeout

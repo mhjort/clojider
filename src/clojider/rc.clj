@@ -3,6 +3,7 @@
            [clojure.java.io :as io]
            [clj-time.core :as t]
            [clj-gatling.core :as gatling]
+           [clojider-gatling-highcharts-sthree-reporter.core :as s3]
            [cheshire.core :refer [generate-string parse-stream]])
   (:import [com.amazonaws ClientConfiguration]
            [com.amazonaws.regions Regions]
@@ -19,8 +20,6 @@
 
 (defn invoke-lambda [simulation lambda-function-name options]
   (println "Invoking Lambda for node:" (:node-id options))
-  (println "options are" options)
-  (println "simulation is" simulation)
   (let [client-config (-> (ClientConfiguration.)
                           (.withSocketTimeout (* 6 60 1000)))
         client (-> (AWSLambdaClient. @aws-credentials client-config)
@@ -54,16 +53,20 @@
 
 (defn lambda-executor [lambda-function-name node-id simulation options]
   (println "Starting AWS Lambda executor with id:" node-id)
-  (invoke-lambda-sequentially (str simulation)
-                              lambda-function-name
-                              (update options :reporters #(map str %))
-                              node-id))
+  (let [only-collector-as-str (fn [reporter]
+                                (-> reporter
+                                    (dissoc :generator)
+                                    (update :collector str)))]
+    (invoke-lambda-sequentially (str simulation)
+                                lambda-function-name
+                                (update options :reporters #(map only-collector-as-str %))
+                                node-id)))
 
 (defn run-simulation [^clojure.lang.Symbol simulation
                       {:keys [concurrency lambda-function-name node-count bucket-name duration region] :as options
                        :or {lambda-function-name "clojider-load-testing-lambda"
                             node-count 1}}]
-  (let [reporter 'clojider-gatling-highcharts-sthree-reporter.core/gatling-highcharts-s3-reporter]
+  (let [reporter s3/reporter]
     (gatling/run simulation (-> options
                                 (update :context #(assoc % :region region :bucket-name bucket-name))
                                 (assoc :nodes node-count

@@ -5,8 +5,8 @@
             :url "http://www.eclipse.org/legal/epl-v10.html"}
   :dependencies [[org.clojure/clojure "1.8.0"]
                  [cheshire "5.5.0"]
-                 [clj-gatling "0.12.0-beta1"]
-                 [clojider-gatling-highcharts-s3-reporter "0.1.0"]
+                 [clj-gatling "0.12.0-beta2"]
+                 [clojider-gatling-highcharts-s3-reporter "0.1.1"]
                  [uswitch/lambada "0.1.0"]
                  [org.clojure/tools.cli "0.3.3"]
                  [com.amazonaws/aws-java-sdk-iam "1.10.50"]

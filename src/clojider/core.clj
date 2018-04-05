@@ -1,6 +1,8 @@
 (ns clojider.core
   (:require [clojure.tools.cli :refer [parse-opts]]
             [clojider.rc :as rc]
+            [clojure.string :refer [split]]
+            [clojider-gatling-highcharts-sthree-reporter.core :as s3]
             [clj-gatling.core :as gatling]
             [clj-time.core :as t]
             [clojider.aws :as aws])
@@ -11,6 +13,7 @@
    ["-b" "--bucket BUCKET" "Amazon S3 bucket name for Clojider result files"]
    ["-f" "--file FILE" "Path of uberjar"]
    ["-s" "--simulation SIMULATION" "Fully qualified name of simulation"]
+   ["-e" "--custom-reporters CUSTOM-REPORTERS" "Comma separated list of fully qualified names of custom reporters to use"]
    ["-c" "--concurrency CONCURRENCY" "Concurrency"
     :default 1
     :parse-fn #(Integer/parseInt %)]
@@ -24,19 +27,27 @@
     :default (t/seconds 1)
     :parse-fn #(t/seconds (Integer/parseInt %))]])
 
-(defn run-with-lambda [{:keys [simulation region bucket concurrency nodes duration timeout]}]
+(defn- choose-reporters [reporters-str]
+  (if reporters-str
+    (map #(eval (read-string %)) (split reporters-str #","))
+    [s3/reporter]))
+
+(defn run-with-lambda [{:keys [simulation region bucket concurrency nodes duration timeout custom-reporters] :as options}]
+  (println "Running simulation" simulation "with options" options)
   (rc/run-simulation (read-string simulation) {:region region
                                                :concurrency concurrency
                                                :node-count nodes
                                                :bucket-name bucket
+                                               :reporters (choose-reporters custom-reporters)
                                                :timeout-in-ms timeout
                                                :duration duration}))
 
-(defn run-using-local-machine [{:keys [simulation concurrency duration timeout]}]
-  (println "Loading simulation" simulation)
+(defn run-using-local-machine [{:keys [simulation concurrency duration timeout custom-reporters] :as options}]
+  (println "Running simulation" simulation "with options" options)
   (gatling/run simulation
                {:concurrency concurrency
                 :root "tmp"
+                :reporters (choose-reporters custom-reporters)
                 :timeout-in-ms timeout
                 :duration duration}))
 

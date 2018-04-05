@@ -3,7 +3,6 @@
            [clojure.java.io :as io]
            [clj-time.core :as t]
            [clj-gatling.core :as gatling]
-           [clojider-gatling-highcharts-sthree-reporter.core :as s3]
            [cheshire.core :refer [generate-string parse-stream]])
   (:import [com.amazonaws ClientConfiguration]
            [com.amazonaws.regions Regions]
@@ -66,10 +65,8 @@
                       {:keys [concurrency lambda-function-name node-count bucket-name duration region] :as options
                        :or {lambda-function-name "clojider-load-testing-lambda"
                             node-count 1}}]
-  (let [reporter s3/reporter]
-    (gatling/run simulation (-> options
-                                (update :context #(assoc % :region region :bucket-name bucket-name))
-                                (assoc :nodes node-count
-                                       :region region
-                                       :executor (partial lambda-executor lambda-function-name)
-                                       :reporters [reporter])))))
+  (gatling/run simulation (-> options
+                              (update :context #(assoc % :region region :bucket-name bucket-name))
+                              (assoc :nodes node-count
+                                     :region region
+                                     :executor (partial lambda-executor lambda-function-name)))))

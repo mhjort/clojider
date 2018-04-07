@@ -42,10 +42,11 @@
                                                :timeout-in-ms timeout
                                                :duration duration}))
 
-(defn run-using-local-machine [{:keys [simulation concurrency duration timeout custom-reporters] :as options}]
+(defn run-using-local-machine [{:keys [simulation region bucket concurrency duration timeout custom-reporters] :as options}]
   (println "Running simulation" simulation "with options" options)
-  (gatling/run simulation
+  (gatling/run (read-string simulation)
                {:concurrency concurrency
+                :context {:region region :bucket-name bucket}
                 :root "tmp"
                 :reporters (choose-reporters custom-reporters)
                 :timeout-in-ms timeout

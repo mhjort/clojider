@@ -6,8 +6,6 @@
 
 Run clj-gatling load tests on your local machine or by utilizing AWS Lambda technology.
 
-Note! Clojider 0.4.x supports latest [clj-gatling](https://github.com/mhjort/clj-gatling) 0.8 format tests.
-
 ## Features
 
 * Test your system using realistic scenarios. Not just one url.
@@ -21,7 +19,7 @@ Note! Clojider 0.4.x supports latest [clj-gatling](https://github.com/mhjort/clj
   Create new Clojure project & add the following to your `project.clj` `:dependencies`:
 
   ```clojure
-  [clojider "0.4.7"]
+  [clojider "0.5.0"]
   ```
 
   Add this setting to your `project.clj`

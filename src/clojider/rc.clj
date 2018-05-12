@@ -22,7 +22,7 @@
   (let [client-config (-> (ClientConfiguration.)
                           (.withSocketTimeout (* 6 60 1000)))
         client (-> (AWSLambdaClient. @aws-credentials client-config)
-                   (.withRegion (Regions/fromName (:region options))))
+                   (.withRegion (Regions/fromName (-> options :context :region))))
         request (-> (InvokeRequest.)
                     (.withFunctionName lambda-function-name)
                     (.withPayload (generate-string {:simulation simulation
@@ -62,11 +62,18 @@
                                 node-id)))
 
 (defn run-simulation [^clojure.lang.Symbol simulation
-                      {:keys [concurrency lambda-function-name node-count bucket-name duration region] :as options
-                       :or {lambda-function-name "clojider-load-testing-lambda"
-                            node-count 1}}]
-  (gatling/run simulation (-> options
-                              (update :context #(assoc % :region region :bucket-name bucket-name))
-                              (assoc :nodes node-count
-                                     :region region
-                                     :executor (partial lambda-executor lambda-function-name)))))
+                      {:keys [concurrency
+                              node-count
+                              bucket-name
+                              reporters
+                              timeout-in-ms
+                              duration
+                              region]
+                       :or {node-count 1}}]
+  (gatling/run simulation (-> {:context {:region region :bucket-name bucket-name}
+                               :concurrency concurrency
+                               :timeout-in-ms timeout-in-ms
+                               :reporters reporters
+                               :duration duration
+                               :nodes node-count
+                               :executor (partial lambda-executor "clojider-load-testing-lambda")})))

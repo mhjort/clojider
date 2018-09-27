@@ -130,6 +130,7 @@
   (let [role (str "clojider-role-" region)
         policy (str "clojider-policy-" region)
         role-arn (create-role-and-policy role policy bucket)]
+    (Thread/sleep (* 10 1000))
     (create-results-bucket bucket region)
     (store-jar-to-bucket bucket file)
     (create-lambda-fn "clojider-load-testing-lambda" bucket region role-arn)))

@@ -9,10 +9,8 @@
                  [clojider-gatling-highcharts-s3-reporter "0.2.0"]
                  [uswitch/lambada "0.1.0"]
                  [org.clojure/tools.cli "0.3.7"]
-                 [com.amazonaws/aws-java-sdk-iam "1.10.50"]
                  [com.amazonaws/aws-java-sdk-lambda "1.10.50"]
-                 [com.amazonaws/aws-java-sdk-core "1.10.50"]
-                 [com.amazonaws/aws-java-sdk-s3 "1.10.50"]]
+                 [com.amazonaws/aws-java-sdk-core "1.10.50"]]
   :uberjar-exclusions [#"scala.*"]
   :aot [clojider.core clojider.lambda]
   :main clojider.core)

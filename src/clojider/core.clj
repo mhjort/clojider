@@ -4,8 +4,7 @@
             [clojure.string :refer [split]]
             [clojider-gatling-highcharts-sthree-reporter.core :as s3]
             [clj-gatling.core :as gatling]
-            [clj-time.core :as t]
-            [clojider.aws :as aws])
+            [clj-time.core :as t])
   (:gen-class))
 
 (def cli-options
@@ -53,10 +52,7 @@
                 :duration duration}))
 
 (def cmds
-  {"install" aws/install-lambda
-   "uninstall" aws/uninstall-lambda
-   "update" aws/update-lambda
-   "load-lambda" run-with-lambda
+  {"load-lambda" run-with-lambda
    "load-local" run-using-local-machine})
 
 (defn -main [& args]

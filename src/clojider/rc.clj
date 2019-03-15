@@ -1,13 +1,16 @@
 (ns clojider.rc
- (:require [clojider.aws :refer [aws-credentials]]
-           [clojure.java.io :as io]
+ (:require [clojure.java.io :as io]
            [clj-time.core :as t]
            [clj-gatling.core :as gatling]
            [cheshire.core :refer [generate-string parse-stream]])
   (:import [com.amazonaws ClientConfiguration]
            [com.amazonaws.regions Regions]
            [com.amazonaws.services.lambda.model InvokeRequest]
-           [com.amazonaws.services.lambda AWSLambdaClient]))
+           [com.amazonaws.services.lambda AWSLambdaClient]
+           [com.amazonaws.auth DefaultAWSCredentialsProviderChain]))
+
+(def aws-credentials
+  (delay (.getCredentials (DefaultAWSCredentialsProviderChain.))))
 
 (defn parse-result [result]
   (-> result

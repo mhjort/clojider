@@ -5,7 +5,8 @@
             :url "http://www.eclipse.org/legal/epl-v10.html"}
   :dependencies [[org.clojure/clojure "1.10.3"]
                  [cheshire "5.5.0"]
-                 [clj-gatling "0.12.0"]
+                 [clj-gatling "0.16.1" :exclusions [clojider-gatling-highcharts-reporter]]
+                 [clj-time "0.15.2"] ;clj-gatling does not include clj-time anymore
                  [clojider-gatling-highcharts-s3-reporter "0.2.0"]
                  [uswitch/lambada "0.1.2"]
                  [org.clojure/tools.cli "0.3.7"]

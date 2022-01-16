@@ -54,12 +54,12 @@ You can find few simple examples [here](https://github.com/mhjort/clojider/blob/
 which you run locally in a following way.
 
 ```sh
-  lein run load-local -c 5 -d 10 -s clojider.examples/ping-simulation
+  lein run load-local -c 5 -d 10 -b <s3-bucket-name> -s clojider.examples/ping-simulation
 ```
 or
 
 ```sh
-  lein run load-local -c 5 -d 10 -s clojider.examples/metrics-simulation
+  lein run load-local -c 5 -d 10 -b <s3-bucket-name> -s clojider.examples/metrics-simulation
 ```
 
 See [clj-gatling](https://github.com/mhjort/clj-gatling) on how to define test scenarios.

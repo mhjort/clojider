@@ -7,10 +7,12 @@
 
 (defn- run-simulation [input]
   (let [collector-as-symbol (fn [reporter]
-                              (update reporter :collector read-string))]
-    (pipeline/simulation-runner (read-string (:simulation input))
+                              (update reporter :collector read-string))
+        simulation (read-string (:simulation input))]
+    (pipeline/simulation-runner simulation
                                 (-> (:options input)
                                     (update :duration millis)
+                                    (assoc :progress-tracker (fn [_])) ;;TODO How to send this info to CLI?
                                     (assoc :results-dir (System/getProperty "java.io.tmpdir"))
                                     (update :reporters #(map collector-as-symbol %))))))
 

@@ -44,10 +44,11 @@
     (apply merge-with concat
            (mapv #(invoke-lambda simulation
                                  lambda-function-name
-                                 (assoc options
-                                        :node-id node-id
+                                 (-> options
+                                     (assoc :node-id node-id
                                         :duration %
-                                        :timeout-in-ms (:timeout-in-ms options)))
+                                        :timeout-in-ms (:timeout-in-ms options))
+                                     (dissoc :progress-tracker)))
                  durations))))
 
 (defn lambda-executor [lambda-function-name node-id simulation options]

@@ -6,6 +6,8 @@
 
 Run clj-gatling load tests on your local machine or by utilizing AWS Lambda technology.
 
+Note! This is an experimental alpha stage tool/library.
+
 ## Features
 
 * Test your system using realistic scenarios. Not just one url.
